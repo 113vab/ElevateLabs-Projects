@@ -1,0 +1,47 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 280 60" width="280" height="60">
+  <defs>
+    <!-- Gradients -->
+    <linearGradient id="viona-violet" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#A78BFA" />
+      <stop offset="100%" stop-color="#8B5CF6" />
+    </linearGradient>
+    <linearGradient id="viona-cyan" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#22D3EE" />
+      <stop offset="100%" stop-color="#06B6D4" />
+    </linearGradient>
+    <linearGradient id="viona-pink" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#F472B6" />
+      <stop offset="100%" stop-color="#EC4899" />
+    </linearGradient>
+    
+    <!-- Neon Glow -->
+    <filter id="viona-glow" x="-30%" y="-30%" width="160%" height="160%">
+      <feGaussianBlur stdDeviation="3" result="blur" />
+      <feMerge>
+        <feMergeNode in="blur" />
+        <feMergeNode in="SourceGraphic" />
+      </feMerge>
+    </filter>
+  </defs>
+
+  <!-- Orbital V Brand Mark (g: x=12, y=5) -->
+  <g transform="translate(12, 5)">
+    <!-- 1. The Orbit Circle (dashed, cyan gradient) -->
+    <circle cx="25" cy="25" r="21" stroke="url(#viona-cyan)" stroke-width="1.75" stroke-dasharray="4 3" fill="none" opacity="0.85" transform="rotate(-20 25 25)" />
+    
+    <!-- 2. The Geometric V (Violet gradient) -->
+    <path d="M14 15 L25 35 L36 15" stroke="url(#viona-violet)" stroke-width="5.5" stroke-linecap="round" stroke-linejoin="round" fill="none" filter="url(#viona-glow)" />
+    
+    <!-- 3. The Overlapping Accent Ribbon (Pink gradient) -->
+    <path d="M25 35 L36 15" stroke="url(#viona-pink)" stroke-width="5.5" stroke-linecap="round" fill="none" />
+    
+    <!-- 4. Orbital Node (Secure encryption packet key) -->
+    <circle cx="43.5" cy="14" r="3.5" fill="#F472B6" filter="url(#viona-glow)" />
+  </g>
+
+  <!-- Wordmark "VIONA" -->
+  <text x="74" y="36" font-family="'Outfit', 'Plus Jakarta Sans', -apple-system, sans-serif" font-size="28" font-weight="800" letter-spacing="4" fill="#FFFFFF">VIONA</text>
+  
+  <!-- Tagline "SECURE. SIMPLIFIED." -->
+  <text x="76" y="49" font-family="'Space Grotesk', -apple-system, sans-serif" font-size="8" font-weight="700" letter-spacing="1.8" fill="#22D3EE" opacity="0.9">SECURE. SIMPLIFIED.</text>
+</svg>

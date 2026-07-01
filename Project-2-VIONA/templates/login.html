@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VIONA - Secure Login</title>
+    <link rel="icon" type="image/svg+xml" href="{{ url_for('static', filename='images/favicon.svg') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+
+    <header>
+        <a href="{{ url_for('home') }}" class="logo">
+            <img src="{{ url_for('static', filename='images/logo.svg') }}" class="logo-img" alt="VIONA Logo">
+        </a>
+    </header>
+
+    <div class="auth-wrapper fade-in">
+        <div class="auth-card">
+            <div class="auth-header">
+                <h2>Welcome Back</h2>
+                <p>Access your secure collaboration workspace</p>
+            </div>
+
+            <!-- Flash notification banners -->
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    <div class="flash-container">
+                        {% for category, message in messages %}
+                            <div class="flash-message {{ category }}">
+                                <span>{{ message }}</span>
+                                <button class="btn-text" onclick="this.parentElement.style.display='none'" style="color: inherit; font-size: 1.1rem; line-height: 1;">&times;</button>
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            {% endwith %}
+
+            <form method="POST" action="{{ url_for('login') }}">
+                {{ form.hidden_tag() }}
+
+                <div class="form-group">
+                    {{ form.email.label(class="form-label") }}
+                    {{ form.email(class="form-input", placeholder="name@company.com", autocomplete="email") }}
+                    {% if form.email.errors %}
+                        {% for error in form.email.errors %}
+                            <div class="form-error">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
+                                <span>{{ error }}</span>
+                            </div>
+                        {% endfor %}
+                    {% endif %}
+                </div>
+
+                <div class="form-group">
+                    {{ form.password.label(class="form-label") }}
+                    {{ form.password(class="form-input", placeholder="••••••••", autocomplete="current-password") }}
+                    {% if form.password.errors %}
+                        {% for error in form.password.errors %}
+                            <div class="form-error">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
+                                <span>{{ error }}</span>
+                            </div>
+                        {% endfor %}
+                    {% endif %}
+                </div>
+
+                <div class="form-group" style="margin-top: 2.25rem;">
+                    {{ form.submit(class="btn btn-primary") }}
+                </div>
+            </form>
+
+            <div class="auth-footer">
+                Don't have an account? <a href="{{ url_for('register') }}">Create an account</a>
+            </div>
+        </div>
+    </div>
+
+</body>
+</html>

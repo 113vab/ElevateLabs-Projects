@@ -1,0 +1,318 @@
+/* Custom CSS for Network Sniffer & Alert System Dashboard */
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&family=JetBrains+Mono:wght@400;700&display=swap');
+
+:root {
+    --bg-dark: #0b0f19;
+    --bg-card: rgba(17, 24, 39, 0.7);
+    --border-glow: rgba(59, 130, 246, 0.2);
+    --neon-blue: #3b82f6;
+    --neon-cyan: #06b6d4;
+    --neon-green: #10b981;
+    --neon-red: #ef4444;
+    --neon-amber: #f59e0b;
+    --text-primary: #f3f4f6;
+    --text-secondary: #9ca3af;
+}
+
+body {
+    background-color: var(--bg-dark);
+    color: var(--text-primary);
+    font-family: 'Outfit', sans-serif;
+    min-height: 100vh;
+    background-image: 
+        radial-gradient(at 0% 0%, rgba(59, 130, 246, 0.15) 0px, transparent 50%),
+        radial-gradient(at 100% 100%, rgba(6, 182, 212, 0.1) 0px, transparent 50%);
+    background-attachment: fixed;
+}
+
+/* Glassmorphism Cards */
+.glass-card {
+    background: var(--bg-card);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid var(--border-glow);
+    border-radius: 16px;
+    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.glass-card:hover {
+    transform: translateY(-4px);
+    border-color: rgba(59, 130, 246, 0.4);
+    box-shadow: 0 12px 40px 0 rgba(59, 130, 246, 0.15);
+}
+
+/* Navbar Style */
+.navbar-custom {
+    background: rgba(11, 15, 25, 0.8) !important;
+    backdrop-filter: blur(16px);
+    border-bottom: 1px solid var(--border-glow);
+}
+
+.navbar-brand {
+    font-weight: 800;
+    letter-spacing: 1px;
+    background: linear-gradient(to right, var(--neon-cyan), var(--neon-blue));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+/* Status Indicator */
+.status-indicator {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 12px;
+    border-radius: 50px;
+    background: rgba(16, 185, 129, 0.1);
+    border: 1px solid rgba(16, 185, 129, 0.2);
+    color: var(--neon-green);
+    font-weight: 600;
+    font-size: 0.85rem;
+}
+
+.status-dot {
+    width: 8px;
+    height: 8px;
+    background-color: var(--neon-green);
+    border-radius: 50%;
+    box-shadow: 0 0 10px var(--neon-green);
+    animation: pulse 1.5s infinite;
+}
+
+@keyframes pulse {
+    0% {
+        transform: scale(0.9);
+        opacity: 1;
+    }
+    50% {
+        transform: scale(1.2);
+        opacity: 0.4;
+    }
+    100% {
+        transform: scale(0.9);
+        opacity: 1;
+    }
+}
+
+/* Tables style */
+.table-custom {
+    color: var(--text-primary) !important;
+}
+
+.table-custom th {
+    border-top: none;
+    border-bottom: 2px solid var(--border-glow) !important;
+    color: var(--text-secondary);
+    font-weight: 600;
+    text-transform: uppercase;
+    font-size: 0.75rem;
+    letter-spacing: 0.5px;
+}
+
+.table-custom td {
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    vertical-align: middle;
+    font-size: 0.9rem;
+}
+
+.mono-text {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.85rem;
+}
+
+/* Severity Badges */
+.badge-severity-critical {
+    background: rgba(239, 68, 68, 0.25);
+    border: 1px solid #f43f5e;
+    color: #f43f5e;
+    box-shadow: 0 0 12px rgba(244, 63, 94, 0.4);
+    animation: flash-badge 1.5s infinite;
+}
+
+.badge-severity-high {
+    background: rgba(239, 68, 68, 0.15);
+    border: 1px solid var(--neon-red);
+    color: var(--neon-red);
+    box-shadow: 0 0 8px rgba(239, 68, 68, 0.2);
+}
+
+.badge-severity-medium {
+    background: rgba(245, 158, 11, 0.15);
+    border: 1px solid var(--neon-amber);
+    color: var(--neon-amber);
+    box-shadow: 0 0 8px rgba(245, 158, 11, 0.2);
+}
+
+.badge-severity-low {
+    background: rgba(59, 130, 246, 0.15);
+    border: 1px solid var(--neon-blue);
+    color: var(--neon-blue);
+    box-shadow: 0 0 8px rgba(59, 130, 246, 0.2);
+}
+
+/* Custom button */
+.btn-neon-blue {
+    background: linear-gradient(135deg, var(--neon-blue), #2563eb);
+    color: white;
+    border: none;
+    font-weight: 600;
+    transition: all 0.3s;
+}
+
+.btn-neon-blue:hover {
+    box-shadow: 0 0 15px rgba(59, 130, 246, 0.5);
+    transform: translateY(-1px);
+    color: white;
+}
+
+.btn-neon-outline {
+    background: transparent;
+    border: 1px solid var(--neon-blue);
+    color: var(--neon-blue);
+    font-weight: 600;
+    transition: all 0.3s;
+}
+
+.btn-neon-outline:hover {
+    background: var(--neon-blue);
+    color: white;
+    box-shadow: 0 0 15px rgba(59, 130, 246, 0.3);
+}
+
+@keyframes flash-badge {
+    0% { opacity: 1; }
+    50% { opacity: 0.6; }
+    100% { opacity: 1; }
+}
+
+/* Cyberpunk SOC Theme Extensions */
+.cyber-grid {
+    background-size: 20px 20px;
+    background-image: 
+        linear-gradient(to right, rgba(255, 255, 255, 0.02) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
+}
+
+.glow-text-cyan {
+    color: var(--neon-cyan);
+    text-shadow: 0 0 10px rgba(6, 182, 212, 0.6);
+}
+
+.glow-text-red {
+    color: var(--neon-red);
+    text-shadow: 0 0 10px rgba(239, 68, 68, 0.6);
+}
+
+/* Threat Indicator Dial */
+.threat-dial-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 15px;
+    border-radius: 12px;
+    transition: all 0.4s ease;
+}
+
+.threat-dial-value {
+    font-size: 2.2rem;
+    font-weight: 800;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    margin-top: 5px;
+    text-shadow: 0 0 15px currentColor;
+}
+
+.threat-status-STABLE {
+    background: rgba(16, 185, 129, 0.05);
+    border: 1px solid rgba(16, 185, 129, 0.3);
+    color: var(--neon-green) !important;
+}
+
+.threat-status-GUARDED {
+    background: rgba(59, 130, 246, 0.05);
+    border: 1px solid rgba(59, 130, 246, 0.3);
+    color: var(--neon-blue) !important;
+}
+
+.threat-status-ELEVATED {
+    background: rgba(245, 158, 11, 0.05);
+    border: 1px solid rgba(245, 158, 11, 0.3);
+    color: var(--neon-amber) !important;
+}
+
+.threat-status-SEVERE {
+    background: rgba(249, 115, 22, 0.05);
+    border: 1px solid rgba(249, 115, 22, 0.3);
+    color: #f97316 !important;
+}
+
+.threat-status-CRITICAL {
+    background: rgba(244, 63, 94, 0.1);
+    border: 1px solid rgba(244, 63, 94, 0.5);
+    color: #f43f5e !important;
+    animation: critical-pulse 2s infinite alternate;
+}
+
+@keyframes critical-pulse {
+    from {
+        box-shadow: inset 0 0 10px rgba(244, 63, 94, 0.2), 0 0 5px rgba(244, 63, 94, 0.2);
+    }
+    to {
+        box-shadow: inset 0 0 20px rgba(244, 63, 94, 0.4), 0 0 15px rgba(244, 63, 94, 0.4);
+    }
+}
+
+/* Feed List Styles */
+.feed-container {
+    max-height: 320px;
+    overflow-y: auto;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(59, 130, 246, 0.3) rgba(0, 0, 0, 0.2);
+}
+
+.feed-container::-webkit-scrollbar {
+    width: 6px;
+}
+
+.feed-container::-webkit-scrollbar-track {
+    background: rgba(0, 0, 0, 0.2);
+}
+
+.feed-container::-webkit-scrollbar-thumb {
+    background-color: rgba(59, 130, 246, 0.3);
+    border-radius: 3px;
+}
+
+.feed-item {
+    padding: 10px 12px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+    font-size: 0.85rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    transition: background-color 0.2s ease;
+}
+
+.feed-item:hover {
+    background: rgba(255, 255, 255, 0.02);
+}
+
+.feed-item-meta {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+/* Mini table headers for SOC widgets */
+.soc-th {
+    font-size: 0.7rem;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    border-bottom: 1px solid var(--border-glow);
+    padding-bottom: 8px;
+}
+
+

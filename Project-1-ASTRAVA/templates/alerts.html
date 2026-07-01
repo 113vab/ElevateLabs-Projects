@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Security Alerts - ASTRAVA</title>
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
+    <!-- Custom CSS -->
+    <link href="{{ url_for('static', filename='css/style.css') }}" rel="stylesheet">
+</head>
+<body>
+
+    <!-- Navigation Bar -->
+    <nav class="navbar navbar-expand-lg navbar-dark navbar-custom py-3">
+        <div class="container">
+            <a class="navbar-brand d-flex align-items-center" href="/">
+                <i class="bi bi-shield-slash-fill me-2 fs-3 text-info"></i>
+                <span>ASTRAVA</span>
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto align-items-center">
+                    <li class="nav-item">
+                        <a class="nav-link" href="/"><i class="bi bi-cpu me-1"></i> Dashboard</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/packets"><i class="bi bi-activity me-1"></i> Live Traffic</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active text-danger" href="/alerts"><i class="bi bi-exclamation-triangle me-1"></i> Alerts</a>
+                    </li>
+                    <li class="nav-item ms-3">
+                        <div class="status-indicator">
+                            <div class="status-dot"></div>
+                            <span>MONITOR ACTIVE</span>
+                        </div>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Container -->
+    <div class="container my-5">
+        <div class="row mb-4">
+            <div class="col-12 d-flex justify-content-between align-items-center">
+                <div>
+                    <h1 class="fw-bold mb-1 text-danger"><i class="bi bi-shield-exclamation me-2"></i>Security Alerts</h1>
+                    <p class="text-secondary">Security violations and anomalous network signatures flagged by threat rules.</p>
+                </div>
+                <div>
+                    <a href="/" class="btn btn-neon-outline btn-sm">
+                        <i class="bi bi-arrow-left me-1"></i> Back to Dashboard
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-12">
+                <div class="glass-card p-4">
+                    <div class="table-responsive">
+                        <table class="table table-custom table-hover align-middle mb-0">
+                            <thead>
+                                <tr>
+                                    <th>Alert ID</th>
+                                    <th>Timestamp</th>
+                                    <th>Rule Triggered</th>
+                                    <th>Severity</th>
+                                    <th>Threat Details</th>
+                                    <th>Trigger Packet</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for alert in alerts %}
+                                <tr class="{% if alert.severity == 'High' or alert.severity == 'Critical' %}bg-danger bg-opacity-10{% endif %}">
+                                    <td class="mono-text text-secondary">#{{ alert.id }}</td>
+                                    <td class="mono-text text-secondary">{{ alert.timestamp.strftime('%Y-%m-%d %H:%M:%S') }}</td>
+                                    <td class="fw-bold text-danger">{{ alert.rule_name }}</td>
+                                    <td>
+                                        <span class="badge badge-severity-{{ alert.severity|lower }} px-3 py-2">
+                                            {{ alert.severity }}
+                                        </span>
+                                    </td>
+                                    <td>{{ alert.description }}</td>
+                                    <td class="mono-text">
+                                        {% if alert.packet_id %}
+                                        <span class="text-info" title="{{ alert.packet.info if alert.packet else '' }}">
+                                            Packet #{{ alert.packet_id }} ({{ alert.packet.protocol if alert.packet else 'N/A' }})
+                                        </span>
+                                        {% else %}
+                                        <span class="text-muted">No packet linked</span>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                {% else %}
+                                <tr>
+                                    <td colspan="6" class="text-center text-success py-5">
+                                        <i class="bi bi-shield-check fs-1 mb-3 d-block text-success"></i>
+                                        No threat signatures detected. Your network is currently secure.
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap Bundle JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

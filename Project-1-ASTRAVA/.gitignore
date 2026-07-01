@@ -1,0 +1,11 @@
+venv/
+**pycache**/
+*.pyc
+
+database/sniffer.db
+
+.vscode/
+.idea/
+
+.env
+*.log

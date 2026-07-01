@@ -1,0 +1,1774 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VIONA - Secure Workspace</title>
+    <link rel="icon" type="image/svg+xml" href="{{ url_for('static', filename='images/favicon.svg') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
+</head>
+<body>
+
+    <div class="app-container">
+        
+        <!-- Left Sidebar Navigation -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <a href="#" onclick="switchTab('home'); return false;" class="sidebar-logo">
+                    <img src="{{ url_for('static', filename='images/logo.svg') }}" class="sidebar-logo-img" alt="VIONA">
+                </a>
+            </div>
+            
+            <div class="sidebar-content">
+                <!-- Navigation Tabs (Home, Chats, Contacts, Settings) -->
+                <div class="sidebar-section">
+                    <ul class="sidebar-menu-list">
+                        <li class="sidebar-menu-item" id="menu-home">
+                            <a href="#" onclick="switchTab('home'); return false;">
+                                <svg viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" stroke-width="1.6" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+                                    <polyline points="9 22 9 12 15 12 15 22"></polyline>
+                                </svg>
+                                Home
+                            </a>
+                        </li>
+                        <li class="sidebar-menu-item active" id="menu-chats">
+                            <a href="#" onclick="switchTab('chats'); return false;">
+                                <svg viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" stroke-width="1.6" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+                                </svg>
+                                Chats
+                                <span class="notification-badge-pink">1</span>
+                            </a>
+                        </li>
+                        <li class="sidebar-menu-item" id="menu-contacts">
+                            <a href="#" onclick="switchTab('contacts'); return false;">
+                                <svg viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" stroke-width="1.6" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                                    <circle cx="9" cy="7" r="4"></circle>
+                                    <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+                                    <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+                                </svg>
+                                Contacts
+                            </a>
+                        </li>
+                        <li class="sidebar-menu-item" id="menu-settings">
+                            <a href="#" onclick="toggleProfileDrawer(); return false;">
+                                <svg viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" stroke-width="1.6" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                                    <circle cx="12" cy="12" r="3"></circle>
+                                    <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+                                </svg>
+                                Settings
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+            
+            <!-- Sidebar Footer -->
+            <div class="sidebar-footer">
+                <button class="user-profile-btn" onclick="toggleProfileDrawer()" title="View Account Details">
+                    <div class="user-avatar-wrapper">
+                        <div class="user-avatar">
+                            {{ current_user.username[0]|upper if current_user.username else 'U' }}
+                        </div>
+                        <span class="user-status-dot online"></span>
+                    </div>
+                    <div class="user-info">
+                        <span class="user-name">{{ current_user.username }}</span>
+                        <span class="user-email">{{ current_user.email }}</span>
+                    </div>
+                </button>
+                <button class="logout-icon-btn" onclick="window.location.href=`{{ url_for('logout') }}`" title="Sign Out">
+                    <svg viewBox="0 0 24 24" width="15" height="15" stroke="currentColor" stroke-width="2.2" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+                        <polyline points="16 17 21 12 16 7"></polyline>
+                        <line x1="21" y1="12" x2="9" y2="12"></line>
+                    </svg>
+                </button>
+            </div>
+        </aside>
+        
+        <!-- Main Area (Communication Workspace Dashboard) -->
+        <main class="main-content">
+            
+            <!-- Top Navbar (Search palette trigger) -->
+            <div class="main-navbar">
+                <div class="main-navbar-title" onclick="openPalette()" style="color: var(--primary-muted); cursor: pointer; font-size: 0.8rem; display: flex; align-items: center; gap: 0.5rem; width: 100%;">
+                    <svg viewBox="0 0 24 24" width="13" height="13" stroke="currentColor" stroke-width="2.2" fill="none" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+                    Search chats or contacts... (Ctrl+K)
+                </div>
+            </div>
+            
+            <!-- Flash notification banners -->
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    <div class="flash-container">
+                        {% for category, message in messages %}
+                            <div class="flash-message {{ category }}">
+                                <span>{{ message }}</span>
+                                <button class="btn-text" onclick="this.parentElement.style.display='none'" style="background: none; border: none; color: inherit; font-size: 1.1rem; cursor: pointer; line-height: 1;">&times;</button>
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            {% endwith %}
+            
+            <!-- Tab 1: Home Tab -->
+            <div id="tab-home" class="tab-panel hidden">
+                <div class="workspace-welcome">
+                    <!-- Floating Orbital V Hero Element -->
+                    <div class="hero-brand-container">
+                        <div class="hero-orbital-v">
+                            <svg viewBox="0 0 128 128" width="100" height="100" class="hero-svg">
+                                <defs>
+                                    <linearGradient id="hero-violet" x1="0%" y1="0%" x2="100%" y2="100%">
+                                        <stop offset="0%" stop-color="#A78BFA" />
+                                        <stop offset="100%" stop-color="#8B5CF6" />
+                                    </linearGradient>
+                                    <linearGradient id="hero-cyan" x1="0%" y1="0%" x2="100%" y2="100%">
+                                        <stop offset="0%" stop-color="#22D3EE" />
+                                        <stop offset="100%" stop-color="#06B6D4" />
+                                    </linearGradient>
+                                    <linearGradient id="hero-pink" x1="0%" y1="0%" x2="100%" y2="100%">
+                                        <stop offset="0%" stop-color="#F472B6" />
+                                        <stop offset="100%" stop-color="#EC4899" />
+                                    </linearGradient>
+                                    <filter id="hero-glow" x="-30%" y="-30%" width="160%" height="160%">
+                                        <feGaussianBlur stdDeviation="5" result="blur" />
+                                        <feMerge>
+                                            <feMergeNode in="blur" />
+                                            <feMergeNode in="SourceGraphic" />
+                                        </feMerge>
+                                    </filter>
+                                </defs>
+                                <circle cx="64" cy="64" r="48" stroke="url(#hero-cyan)" stroke-width="2.5" stroke-dasharray="6 4" fill="none" opacity="0.9" class="hero-orbit-ring" />
+                                <path d="M42 46 L64 82 L86 46" stroke="url(#hero-violet)" stroke-width="7" stroke-linecap="round" stroke-linejoin="round" fill="none" filter="url(#hero-glow)" />
+                                <path d="M64 82 L86 46" stroke="url(#hero-pink)" stroke-width="7" stroke-linecap="round" fill="none" />
+                                <circle cx="98" cy="44" r="5" fill="#F472B6" filter="url(#hero-glow)" class="hero-orbit-node" />
+                            </svg>
+                        </div>
+                    </div>
+                    <h1 class="welcome-title" id="welcome-greeting">Good Afternoon, {{ current_user.username }} 👋</h1>
+                    <p class="welcome-subtitle">Your secure workspace is ready.</p>
+                    
+                    <div class="welcome-actions-row">
+                        <button class="btn" onclick="openStartChatModal()">Start Conversation</button>
+                        <button class="btn btn-secondary" onclick="openAddContactModal()">Add Contact</button>
+                    </div>
+                    
+                    <!-- Section 1: Recent Conversations -->
+                    <div class="content-section">
+                        <h3 class="content-section-title">Recent Conversations</h3>
+                        <div id="home-recent-conversations" class="content-list-wrapper">
+                            {% if conversations %}
+                                <div class="recent-conversations-grid">
+                                    {% for conv in conversations[:3] %}
+                                        <div class="recent-conv-item" onclick="openConversation({{ conv.id }}, '{{ (conv.display_name or conv.name)|escape }}')">
+                                            <div class="chat-avatar-wrapper">
+                                                <div class="conv-avatar">{{ (conv.display_name or conv.name)[0]|upper }}</div>
+                                                <span class="chat-status-dot" data-username="{{ (conv.display_name or conv.name)|escape }}"></span>
+                                            </div>
+                                            <div class="conv-details">
+                                                <span class="conv-name">{{ conv.display_name or conv.name }}</span>
+                                                <span class="conv-meta">Open conversation</span>
+                                            </div>
+                                        </div>
+                                    {% endfor %}
+                                </div>
+                            {% else %}
+                                <div class="empty-state-card">
+                                    <div class="empty-state-illustration">
+                                        <svg viewBox="0 0 24 24" width="44" height="44" stroke="currentColor" stroke-width="1.2" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                                            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+                                        </svg>
+                                    </div>
+                                    <p class="empty-state-desc">No conversations yet.<br>Start your first secure conversation.</p>
+                                    <button class="btn btn-sm btn-outline" onclick="openStartChatModal()">Start Conversation</button>
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    
+                    <!-- Section 2: Contacts -->
+                    <div class="content-section">
+                        <h3 class="content-section-title">Contacts</h3>
+                        <div id="home-contacts-list" class="content-list-wrapper">
+                            {% if contacts %}
+                                <div class="recent-contacts-grid">
+                                    {% for contact in contacts[:3] %}
+                                        <div class="recent-contact-item">
+                                            <div class="contact-avatar-wrapper">
+                                                <div class="contact-avatar">{{ contact.name[0]|upper }}</div>
+                                                <span class="contact-status-dot" data-username="{{ contact.name|escape }}"></span>
+                                            </div>
+                                            <div class="contact-details">
+                                                <span class="contact-name">{{ contact.name }}</span>
+                                                <span class="contact-email">{{ contact.username or contact.email or 'No details' }}</span>
+                                            </div>
+                                            <button class="btn-text-action" onclick="startChatWithContact('{{ contact.name }}')">Message</button>
+                                        </div>
+                                    {% endfor %}
+                                </div>
+                            {% else %}
+                                <div class="empty-state-card">
+                                    <div class="empty-state-illustration">
+                                        <svg viewBox="0 0 24 24" width="44" height="44" stroke="currentColor" stroke-width="1.2" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                                            <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                                            <circle cx="9" cy="7" r="4"></circle>
+                                            <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+                                            <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+                                        </svg>
+                                    </div>
+                                    <p class="empty-state-desc">No contacts added yet.</p>
+                                    <button class="btn btn-sm btn-outline" onclick="openAddContactModal()">Add Contact</button>
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tab 2: Chats Tab -->
+            <div id="tab-chats" class="tab-panel">
+                <div class="chats-workspace" id="chats-workspace-layout">
+                    <!-- Chats Sidebar (List of conversations) -->
+                    <div class="chats-sidebar">
+                        <div class="chats-sidebar-header">
+                            <h2 class="tab-header-title">Chats</h2>
+                            <button class="icon-btn-add" onclick="openStartChatModal()" title="New Chat">
+                                <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                                    <line x1="12" y1="5" x2="12" y2="19"></line>
+                                    <line x1="5" y1="12" x2="19" y2="12"></line>
+                                </svg>
+                            </button>
+                        </div>
+                        
+                        <div class="chats-search-wrapper">
+                            <input type="text" id="chats-search-input" placeholder="Search conversations..." oninput="filterConversations()">
+                        </div>
+                        
+                        <div class="chats-list" id="chats-list-container">
+                            {% if conversations %}
+                                {% for conv in conversations %}
+                                    <div class="chat-list-item" id="chat-item-{{ conv.id }}" onclick="openConversation({{ conv.id }}, '{{ (conv.display_name or conv.name)|escape }}')">
+                                        <div class="chat-avatar-wrapper">
+                                            <div class="chat-avatar">{{ (conv.display_name or conv.name)[0]|upper }}</div>
+                                            <span class="chat-status-dot" data-username="{{ (conv.display_name or conv.name)|escape }}"></span>
+                                        </div>
+                                        <div class="chat-item-info" style="width: 100%;">
+                                            <div class="chat-item-header" style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
+                                                <span class="chat-item-name">{{ conv.display_name or conv.name }}</span>
+                                                {% if conv.unread_count > 0 %}
+                                                    <span class="notification-badge-pink mini" style="margin-left: auto;">{{ conv.unread_count }}</span>
+                                                {% endif %}
+                                            </div>
+                                            <span class="chat-item-preview">Open secure chat</span>
+                                        </div>
+                                    </div>
+                                {% endfor %}
+                            {% else %}
+                                <div class="chats-empty-state" id="chats-empty-text" style="display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 3rem 1.5rem; text-align: center;">
+                                    <p style="margin-bottom: 0.75rem; font-size: 0.8rem; color: var(--primary-muted);">No conversations yet.</p>
+                                    <button class="btn btn-sm btn-outline" onclick="openStartChatModal()" style="font-size: 0.72rem; padding: 0.35rem 0.65rem;">Start Chat</button>
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    
+                    <!-- Chat Viewport (Active chat conversation) -->
+                    <div class="chat-viewport" id="chat-viewport-container">
+                        <div class="chat-viewport-empty" id="chat-empty-state">
+                            <div class="empty-state-glass-card">
+                                <div class="empty-state-icon-wrapper">
+                                    <svg viewBox="0 0 128 128" width="48" height="48">
+                                        <g transform="translate(39, 39) scale(0.8)">
+                                            <circle cx="25" cy="25" r="21" stroke="#22D3EE" stroke-width="2" stroke-dasharray="4.5 3.5" fill="none" opacity="0.9" />
+                                            <path d="M14 15 L25 35 L36 15" stroke="#8B5CF6" stroke-width="5.5" stroke-linecap="round" stroke-linejoin="round" fill="none" />
+                                            <path d="M25 35 L36 15" stroke="#F472B6" stroke-width="5.5" stroke-linecap="round" fill="none" />
+                                            <circle cx="43.5" cy="14" r="3.5" fill="#F472B6" />
+                                        </g>
+                                    </svg>
+                                </div>
+                                <h3 class="empty-state-title">Welcome to VIONA</h3>
+                                <p class="empty-state-description">
+                                    VIONA is a secure, end-to-end encrypted messaging workspace. Connect with contacts or start a secure session to begin.
+                                </p>
+                                <div style="display: flex; gap: 0.75rem;">
+                                    <button class="btn btn-sm" onclick="openStartChatModal()">Start Conversation</button>
+                                    <button class="btn btn-sm btn-secondary" onclick="openAddContactModal()">Add Contact</button>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="chat-viewport-active hidden" id="chat-active-state">
+                            <div class="chat-active-header">
+                                <div class="chat-active-user">
+                                    <button class="back-btn" onclick="closeConversationView()" title="Back to Chats">
+                                        <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                                            <line x1="19" y1="12" x2="5" y2="12"></line>
+                                            <polyline points="12 19 5 12 12 5"></polyline>
+                                        </svg>
+                                    </button>
+                                    <div class="chat-avatar-wrapper">
+                                        <div class="chat-avatar" id="active-chat-avatar">U</div>
+                                        <span class="chat-status-dot" id="active-chat-status-dot" data-username=""></span>
+                                    </div>
+                                    <div class="chat-active-user-details">
+                                        <span class="chat-active-name" id="active-chat-name">Contact Name</span>
+                                        <span class="chat-active-status">Session active</span>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="chat-messages-container" id="chat-messages-box">
+                                <!-- Message bubbles populated dynamically -->
+                            </div>
+                            
+                            <!-- Chat Input Box -->
+                            <div class="chat-input-bar">
+                                <input type="text" id="chat-message-input" placeholder="Type a secure message..." onkeydown="handleChatInputKey(event)" oninput="handleTypingState()">
+                                <button class="btn" onclick="sendChatMessage()">Send</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tab 3: Contacts Tab -->
+            <div id="tab-contacts" class="tab-panel hidden">
+                <div class="contacts-workspace">
+                    <div class="contacts-header-row">
+                        <h2 class="tab-header-title">Contacts</h2>
+                        <button class="btn" onclick="openAddContactModal()">+ Add Contact</button>
+                    </div>
+                    
+                    <div class="contacts-search-wrapper">
+                        <input type="text" id="contacts-search-input" placeholder="Search contacts..." oninput="filterContacts()">
+                    </div>
+                    
+                    <div class="contacts-list-grid" id="contacts-grid-container">
+                        {% if contacts %}
+                            {% for contact in contacts %}
+                                <div class="contact-card" id="contact-card-{{ contact.id }}">
+                                    <div class="contact-card-avatar-wrapper">
+                                        <div class="contact-card-avatar">{{ contact.name[0]|upper }}</div>
+                                        <span class="contact-status-dot" data-username="{{ contact.name|escape }}"></span>
+                                    </div>
+                                    <div class="contact-card-info">
+                                        <span class="contact-card-name">{{ contact.name }}</span>
+                                        <span class="contact-card-username">{{ contact.username or contact.email or 'No email' }}</span>
+                                    </div>
+                                    <div class="contact-card-actions">
+                                        <button class="btn btn-secondary btn-sm" onclick="startChatWithContact('{{ contact.name }}')">Message</button>
+                                        <button class="btn-text-danger btn-sm" onclick="deleteContact({{ contact.id }})">Delete</button>
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        {% else %}
+                            <div class="contacts-empty-state-full" id="contacts-empty-text" style="display: flex; align-items: center; justify-content: center; width: 100%; margin-top: 2rem;">
+                                <div class="empty-state-glass-card">
+                                    <div class="empty-state-icon-wrapper" style="color: var(--cyan); border-color: rgba(6, 182, 212, 0.2); background: radial-gradient(circle at center, rgba(6, 182, 212, 0.1) 0%, rgba(6, 182, 212, 0.02) 100%);">
+                                        <!-- Contacts Icon SVG -->
+                                        <svg viewBox="0 0 24 24" width="24" height="24" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                                            <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                                            <circle cx="9" cy="7" r="4"></circle>
+                                            <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+                                            <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+                                        </svg>
+                                    </div>
+                                    <h3 class="empty-state-title">No Contacts Added</h3>
+                                    <p class="empty-state-description">
+                                        Build your secure network. Search registered users or add external contacts to begin direct messaging.
+                                    </p>
+                                    <button class="btn btn-sm" onclick="openAddContactModal()">Add New Contact</button>
+                                </div>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </main>
+        
+        <!-- Right Drawer: Slide-over Settings Drawer -->
+        <aside id="profile-drawer" class="profile-drawer">
+            <div class="drawer-header">
+                <h3 class="drawer-title">Settings</h3>
+                <button class="drawer-close-btn" onclick="closeProfileDrawer()">&times;</button>
+            </div>
+            
+            <div class="drawer-avatar-section">
+                <div class="drawer-avatar">
+                    {{ current_user.username[0]|upper if current_user.username else 'U' }}
+                </div>
+                <h2 class="drawer-username">{{ current_user.username }}</h2>
+                <div class="online-status-indicator">
+                    <span class="status-dot"></span>
+                    Online
+                </div>
+            </div>
+            
+            <div class="drawer-meta-list">
+                <div class="drawer-meta-row">
+                    <span class="drawer-label">Email</span>
+                    <span class="drawer-val">{{ current_user.email }}</span>
+                </div>
+                <div class="drawer-meta-row">
+                    <span class="drawer-label">Member Since</span>
+                    <span class="drawer-val">{{ current_user.created_at.strftime('%B %d, %Y') if current_user.created_at else 'N/A' }}</span>
+                </div>
+            </div>
+
+            <div class="drawer-section">
+                <h4 class="drawer-section-title">Security Status</h4>
+                <div class="security-chips-container">
+                    <span class="status-chip">
+                        <svg viewBox="0 0 24 24" width="10" height="10" stroke="currentColor" stroke-width="3" fill="none"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                        PostgreSQL Connected
+                    </span>
+                    <span class="status-chip">
+                        <svg viewBox="0 0 24 24" width="10" height="10" stroke="currentColor" stroke-width="3" fill="none"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                        Password Protected
+                    </span>
+                    <span class="status-chip">
+                        <svg viewBox="0 0 24 24" width="10" height="10" stroke="currentColor" stroke-width="3" fill="none"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                        Session Active
+                    </span>
+                </div>
+            </div>
+            
+            <div class="drawer-footer">
+                <button class="btn btn-secondary" onclick="window.location.href=`{{ url_for('logout') }}`" style="width: 100%;">
+                    Sign Out
+                </button>
+            </div>
+        </aside>
+
+        <!-- Command Palette Modal (Simplified Chat/Contact Search) -->
+        <div id="command-palette" class="modal-palette hidden">
+            <div class="palette-card">
+                <div class="palette-input-wrapper">
+                    <!-- Search Icon -->
+                    <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="11" cy="11" r="8"></circle>
+                        <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                    </svg>
+                    <input type="text" id="palette-search" placeholder="Search chats or contacts..." autocomplete="off" oninput="handlePaletteSearch()">
+                    <span class="palette-esc">ESC</span>
+                </div>
+                
+                <div class="palette-results" id="palette-results-box">
+                    <!-- Results populated dynamically -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Start Chat Modal -->
+        <div id="start-chat-modal" class="modal-dialog-overlay hidden">
+            <div class="modal-dialog-card">
+                <div class="modal-dialog-header">
+                    <h3>Start Secure Chat</h3>
+                    <button class="modal-close-btn" onclick="closeStartChatModal()">&times;</button>
+                </div>
+                <div class="modal-dialog-body">
+                    <div class="form-group">
+                        <label class="form-label" for="new-chat-name">Who would you like to chat with?</label>
+                        <input type="text" id="new-chat-name" class="form-input" placeholder="Enter name or select a contact..." autocomplete="off">
+                    </div>
+                    
+                    <div class="modal-contact-suggestions" id="modal-suggestions-box">
+                        <span class="suggestions-label">Contacts List</span>
+                        <div class="suggestions-list" id="suggestions-list-container">
+                            <!-- Populated dynamically or by template -->
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-dialog-footer">
+                    <button class="btn btn-secondary" onclick="closeStartChatModal()">Cancel</button>
+                    <button class="btn" onclick="submitStartChat()">Start Chat</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Add Contact Modal -->
+        <div id="add-contact-modal" class="modal-dialog-overlay hidden">
+            <div class="modal-dialog-card">
+                <div class="modal-dialog-header">
+                    <h3>Add Contact</h3>
+                    <button class="modal-close-btn" onclick="closeAddContactModal()">&times;</button>
+                </div>
+                <div class="modal-dialog-body">
+                    <div class="form-group">
+                        <label class="form-label" for="search-users-input">Search Registered Users</label>
+                        <input type="text" id="search-users-input" class="form-input" placeholder="Search by username or email..." autocomplete="off" oninput="handleUserSearch()">
+                        <div id="search-users-results-box" class="search-users-results" style="margin-top: 0.75rem; max-height: 180px; overflow-y: auto; display: flex; flex-direction: column; gap: 0.4rem;">
+                            <!-- Search results pop up here -->
+                        </div>
+                    </div>
+                    
+                    <div style="border-top: 1px solid var(--border); margin: 1.25rem 0; padding-top: 1.25rem;">
+                        <span class="suggestions-label" style="display: block; margin-bottom: 0.75rem;">Or Add Manually</span>
+                        <div class="form-group">
+                            <label class="form-label" for="new-contact-name">Name / Username</label>
+                            <input type="text" id="new-contact-name" class="form-input" placeholder="e.g. vaibhav" autocomplete="off">
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-dialog-footer">
+                    <button class="btn btn-secondary" onclick="closeAddContactModal()">Cancel</button>
+                    <button class="btn" onclick="submitAddContact()">Add Contact</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Mobile Bottom Navigation Bar -->
+        <nav class="mobile-bottom-nav">
+            <button class="mobile-nav-item" id="mobile-menu-home" onclick="switchTab('home'); return false;">
+                <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="1.6" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+                    <polyline points="9 22 9 12 15 12 15 22"></polyline>
+                </svg>
+                <span>Home</span>
+            </button>
+            <button class="mobile-nav-item active" id="mobile-menu-chats" onclick="switchTab('chats'); return false;">
+                <div style="position: relative; display: inline-block;">
+                    <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="1.6" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+                    </svg>
+                    <span class="notification-badge-pink mini">1</span>
+                </div>
+                <span>Chats</span>
+            </button>
+            <button class="mobile-nav-item" id="mobile-menu-contacts" onclick="switchTab('contacts'); return false;">
+                <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="1.6" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                    <circle cx="9" cy="7" r="4"></circle>
+                    <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+                    <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+                </svg>
+                <span>Contacts</span>
+            </button>
+            <button class="mobile-nav-item" id="mobile-menu-settings" onclick="toggleProfileDrawer(); return false;">
+                <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="1.6" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="12" cy="12" r="3"></circle>
+                    <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+                </svg>
+                <span>Settings</span>
+            </button>
+        </nav>
+        
+    </div>
+
+    <!-- Script triggers -->
+    <script>
+        // Set dynamic Apple-like local time greeting
+        const hour = new Date().getHours();
+        let greeting = "Good Day";
+        if (hour < 12) greeting = "Good Morning";
+        else if (hour < 18) greeting = "Good Afternoon";
+        else greeting = "Good Evening";
+        document.getElementById('welcome-greeting').textContent = `${greeting}, {{ current_user.username }} 👋`;
+
+        // Active State Variables
+        let activeConversationId = null;
+        let contactsData = [];
+        let conversationsData = [];
+        let activities = [];
+
+        // Socket.IO Client Setup
+        const socket = io();
+        const onlineUsers = new Set();
+        let typingTimeout = null;
+        let isTypingCurrently = false;
+
+        function formatLastSeen(isoString) {
+            if (!isoString) return 'Offline';
+            const date = new Date(isoString);
+            const now = new Date();
+            const diffMs = now - date;
+            const diffSec = Math.floor(diffMs / 1000);
+            const diffMin = Math.floor(diffSec / 60);
+            const diffHr = Math.floor(diffMin / 60);
+
+            if (diffSec < 60) {
+                return 'Last seen just now';
+            } else if (diffMin < 60) {
+                return `Last seen ${diffMin} ${diffMin === 1 ? 'minute' : 'minutes'} ago`;
+            } else if (diffHr < 24) {
+                return `Last seen ${diffHr} ${diffHr === 1 ? 'hour' : 'hours'} ago`;
+            } else {
+                const yesterday = new Date(now);
+                yesterday.setDate(yesterday.getDate() - 1);
+                if (date.toDateString() === yesterday.toDateString()) {
+                    return 'Last seen yesterday';
+                }
+                const diffDays = Math.floor(diffHr / 24);
+                if (diffDays < 7) {
+                    return `Last seen ${diffDays} ${diffDays === 1 ? 'day' : 'days'} ago`;
+                }
+                return `Last seen on ${date.toLocaleDateString()}`;
+            }
+        }
+
+        function updateOnlineStatusUI() {
+            const dots = document.querySelectorAll('.chat-status-dot, .contact-status-dot');
+            dots.forEach(dot => {
+                const username = dot.getAttribute('data-username');
+                if (username && onlineUsers.has(username)) {
+                    dot.classList.add('online');
+                } else {
+                    dot.classList.remove('online');
+                }
+            });
+
+            // Update text status indicators on lists
+            const statusTexts = document.querySelectorAll('[data-status-username]');
+            statusTexts.forEach(el => {
+                const username = el.getAttribute('data-status-username');
+                if (username) {
+                    if (onlineUsers.has(username)) {
+                        el.textContent = 'Online';
+                        el.style.color = 'var(--cyan)';
+                    } else {
+                        const contact = contactsData.find(c => c.name === username);
+                        const conv = conversationsData.find(c => c.name === username);
+                        const lastSeenTime = (contact && contact.last_seen) || (conv && conv.last_seen) || null;
+                        el.textContent = formatLastSeen(lastSeenTime);
+                        el.style.color = 'var(--primary-muted)';
+                    }
+                }
+            });
+
+            // Update active conversation header subtext
+            if (activeConversationId) {
+                const activeChatNameEl = document.getElementById('active-chat-name');
+                const activeChatStatusEl = document.querySelector('.chat-active-status');
+                if (activeChatNameEl && activeChatStatusEl) {
+                    const activeChatName = activeChatNameEl.textContent;
+                    if (onlineUsers.has(activeChatName)) {
+                        activeChatStatusEl.textContent = 'Online';
+                        activeChatStatusEl.style.color = 'var(--cyan)';
+                    } else {
+                        const contact = contactsData.find(c => c.name === activeChatName);
+                        const conv = conversationsData.find(c => c.name === activeChatName);
+                        const lastSeenTime = (contact && contact.last_seen) || (conv && conv.last_seen) || null;
+                        activeChatStatusEl.textContent = formatLastSeen(lastSeenTime);
+                        activeChatStatusEl.style.color = 'var(--primary-muted)';
+                    }
+                }
+            }
+        }
+
+        function handleTypingState() {
+            if (!activeConversationId) return;
+
+            if (!isTypingCurrently) {
+                isTypingCurrently = true;
+                socket.emit('typing', {
+                    conversation_id: activeConversationId,
+                    is_typing: true
+                });
+            }
+
+            clearTimeout(typingTimeout);
+            typingTimeout = setTimeout(() => {
+                isTypingCurrently = false;
+                socket.emit('typing', {
+                    conversation_id: activeConversationId,
+                    is_typing: false
+                });
+            }, 2000); // 2 seconds idle timeout
+        }
+
+        function updateTotalUnreadBadge() {
+            const total = conversationsData.reduce((sum, c) => sum + (c.unread_count || 0), 0);
+            
+            const sidebarBadge = document.querySelector('#menu-chats .notification-badge-pink');
+            if (sidebarBadge) {
+                if (total > 0) {
+                    sidebarBadge.textContent = total;
+                    sidebarBadge.style.display = 'inline-flex';
+                } else {
+                    sidebarBadge.style.display = 'none';
+                }
+            }
+            
+            const mobileBadge = document.querySelector('#mobile-menu-chats .notification-badge-pink');
+            if (mobileBadge) {
+                if (total > 0) {
+                    mobileBadge.textContent = total;
+                    mobileBadge.style.display = 'inline-flex';
+                } else {
+                    mobileBadge.style.display = 'none';
+                }
+            }
+        }
+
+        socket.on('connect', () => {
+            socket.emit('get_online_users');
+        });
+
+        socket.on('online_users_list', (users) => {
+            onlineUsers.clear();
+            users.forEach(u => onlineUsers.add(u));
+            updateOnlineStatusUI();
+        });
+
+        socket.on('user_status_change', (data) => {
+            if (data.status === 'online') {
+                onlineUsers.add(data.username);
+            } else {
+                onlineUsers.delete(data.username);
+                // Save last seen locally so it can be formatted dynamically
+                const contact = contactsData.find(c => c.name === data.username);
+                if (contact) contact.last_seen = data.last_seen;
+                const conv = conversationsData.find(c => c.name === data.username);
+                if (conv) conv.last_seen = data.last_seen;
+            }
+            updateOnlineStatusUI();
+        });
+
+        socket.on('new_message', (payload) => {
+            const isMe = payload.sender_name === "{{ current_user.username }}";
+            
+            // Append message bubble if it is for the active conversation
+            if (activeConversationId === parseInt(payload.conversation_id)) {
+                appendMessageBubble(isMe, payload.text, payload.is_read, payload.read_at, payload.is_delivered, payload.delivered_at);
+                
+                // If it is from the contact, mark it as read immediately
+                if (!isMe) {
+                    socket.emit('mark_read', { conversation_id: activeConversationId, message_id: payload.id });
+                }
+            } else {
+                // Increment unread count for other conversations
+                const conv = conversationsData.find(c => c.id === parseInt(payload.conversation_id));
+                if (conv) {
+                    conv.unread_count = (conv.unread_count || 0) + 1;
+                    renderConversationsListUI();
+                    updateTotalUnreadBadge();
+                } else {
+                    // Start notification / reload fallback for new conversations
+                    setTimeout(() => {
+                        window.location.reload();
+                    }, 1000);
+                }
+            }
+
+            // Touch conversation list to show last message preview
+            const convItem = document.getElementById(`chat-item-${payload.conversation_id}`);
+            if (convItem) {
+                const preview = convItem.querySelector('.chat-item-preview');
+                if (preview) {
+                    preview.textContent = payload.text;
+                }
+            }
+        });
+
+        socket.on('messages_read', (data) => {
+            if (activeConversationId === parseInt(data.conversation_id)) {
+                // Update all me bubbles status checkmarks to read
+                const statuses = document.querySelectorAll('.message-bubble.me .message-status');
+                statuses.forEach(status => {
+                    status.innerHTML = ' &#10003;&#10003;';
+                    status.style.color = 'var(--cyan)';
+                });
+            }
+        });
+
+        socket.on('messages_delivered', (data) => {
+            if (activeConversationId === parseInt(data.conversation_id)) {
+                // Update all me bubbles status checkmarks to delivered if they are not already read
+                const bubbles = document.querySelectorAll('.message-bubble.me');
+                bubbles.forEach(bubble => {
+                    const status = bubble.querySelector('.message-status');
+                    if (status && status.innerHTML.trim() === '✓') {
+                        status.innerHTML = ' &#10003;&#10003;'; // Double checkmark
+                        status.style.color = 'var(--primary-muted)';
+                    }
+                });
+            }
+        });
+
+        socket.on('user_typing', (data) => {
+            if (activeConversationId === parseInt(data.conversation_id)) {
+                showTypingIndicator(data.is_typing, data.username);
+            }
+        });
+
+        // Parse initial data injected from Flask template
+        {% for contact in contacts %}
+        contactsData.push({
+            id: {{ contact.id }},
+            name: "{{ contact.name|escape }}",
+            username: "{{ (contact.username or contact.email or '')|escape }}",
+            last_seen: "{{ contact.contact_user.last_seen.isoformat() if (contact.contact_user and contact.contact_user.last_seen) else '' }}"
+        });
+        {% endfor %}
+
+        {% for conv in conversations %}
+        {% set other_user = none %}
+        {% if conv.participants|length == 2 %}
+            {% for p in conv.participants %}
+                {% if p.id != current_user.id %}
+                    {% set other_user = p %}
+                {% endif %}
+            {% endfor %}
+        {% endif %}
+        conversationsData.push({
+            id: {{ conv.id }},
+            name: "{{ (conv.display_name or conv.name)|escape }}",
+            last_seen: "{{ other_user.last_seen.isoformat() if (other_user and other_user.last_seen) else '' }}",
+            unread_count: {{ conv.unread_count or 0 }}
+        });
+        {% endfor %}
+
+        // Log initial activity if any
+        if (contactsData.length > 0) {
+            activities.push(`Workspace active with ${contactsData.length} contacts.`);
+        }
+        updateRecentActivityUI();
+        updateTotalUnreadBadge();
+        updateOnlineStatusUI();
+
+        // Tab Switching Logic
+        function switchTab(tabId) {
+            // Update active menu class (desktop sidebar)
+            document.querySelectorAll('.sidebar-menu-item').forEach(item => {
+                item.classList.remove('active');
+            });
+            const menuElement = document.getElementById(`menu-${tabId}`);
+            if (menuElement) {
+                menuElement.classList.add('active');
+            }
+
+            // Update active menu class (mobile bottom nav)
+            document.querySelectorAll('.mobile-nav-item').forEach(item => {
+                item.classList.remove('active');
+            });
+            const mobileMenuElement = document.getElementById(`mobile-menu-${tabId}`);
+            if (mobileMenuElement) {
+                mobileMenuElement.classList.add('active');
+            }
+
+            // Update tab panel visibility
+            document.querySelectorAll('.tab-panel').forEach(panel => {
+                panel.classList.add('hidden');
+            });
+            document.getElementById(`tab-${tabId}`).classList.remove('hidden');
+
+            // Close Settings Drawer if switching tabs
+            closeProfileDrawer();
+
+            // Additional setup per tab
+            if (tabId === 'chats' && activeConversationId) {
+                scrollToBottom('chat-messages-box');
+            }
+        }
+
+        // Settings Drawer Handles
+        const drawer = document.getElementById('profile-drawer');
+        
+        function toggleProfileDrawer() {
+            drawer.classList.toggle('open');
+            document.body.classList.toggle('drawer-open');
+        }
+        
+        function closeProfileDrawer() {
+            drawer.classList.remove('open');
+            document.body.classList.remove('drawer-open');
+        }
+
+        // --- CONTACTS LOGIC ---
+        function openAddContactModal() {
+            document.getElementById('add-contact-modal').classList.remove('hidden');
+            document.getElementById('search-users-input').focus();
+        }
+
+        function closeAddContactModal() {
+            document.getElementById('add-contact-modal').classList.add('hidden');
+            document.getElementById('search-users-input').value = '';
+            document.getElementById('search-users-results-box').innerHTML = '';
+            document.getElementById('new-contact-name').value = '';
+        }
+
+        function submitAddContact() {
+            const name = document.getElementById('new-contact-name').value.trim();
+            if (!name) {
+                alert('Please enter a Name or search for a user.');
+                return;
+            }
+
+            fetch('/api/contacts', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ name })
+            })
+            .then(res => {
+                if (!res.ok) throw new Error('Failed to create contact');
+                return res.json();
+            })
+            .then(contact => {
+                // Add to contacts data array
+                contactsData.push(contact);
+                contactsData.sort((a, b) => a.name.localeCompare(b.name));
+
+                // Re-render Contacts UI list and Home tab Contacts
+                renderContactsUI();
+                renderHomeContactsUI();
+
+                // Add to activity log
+                logActivity(`Added contact ${contact.name}`);
+
+                closeAddContactModal();
+            })
+            .catch(err => {
+                console.error(err);
+                alert('Error adding contact. Please try again.');
+            });
+        }
+
+        function handleUserSearch() {
+            const query = document.getElementById('search-users-input').value.trim();
+            const resultsBox = document.getElementById('search-users-results-box');
+            
+            if (query.length < 2) {
+                resultsBox.innerHTML = '';
+                return;
+            }
+            
+            fetch(`/api/users/search?q=${encodeURIComponent(query)}`)
+            .then(res => res.json())
+            .then(users => {
+                resultsBox.innerHTML = '';
+                if (users.length === 0) {
+                    resultsBox.innerHTML = `<span style="font-size: 0.78rem; color: var(--primary-muted); padding: 0.5rem 0;">No matching users found.</span>`;
+                    return;
+                }
+                
+                users.forEach(u => {
+                    const item = document.createElement('div');
+                    item.className = 'search-user-item';
+                    item.style.cssText = 'display: flex; align-items: center; justify-content: space-between; padding: 0.55rem 0.75rem; background: var(--bg-hover); border: 1px solid var(--border); border-radius: 8px;';
+                    
+                    const info = document.createElement('div');
+                    info.className = 'search-user-info';
+                    info.style.cssText = 'display: flex; flex-direction: column; gap: 0.1rem;';
+                    
+                    const usernameSpan = document.createElement('span');
+                    usernameSpan.className = 'search-user-username';
+                    usernameSpan.style.cssText = 'font-size: 0.85rem; font-weight: 500; color: var(--primary);';
+                    usernameSpan.textContent = u.username;
+                    
+                    const emailSpan = document.createElement('span');
+                    emailSpan.className = 'search-user-email';
+                    emailSpan.style.cssText = 'font-size: 0.7rem; color: var(--primary-muted);';
+                    emailSpan.textContent = u.email;
+                    
+                    info.appendChild(usernameSpan);
+                    info.appendChild(emailSpan);
+                    
+                    const actionBtn = document.createElement('button');
+                    actionBtn.className = 'btn btn-sm';
+                    actionBtn.style.cssText = 'padding: 0.25rem 0.65rem; font-size: 0.72rem;';
+                    
+                    if (u.is_contact) {
+                        actionBtn.textContent = 'Contact';
+                        actionBtn.disabled = true;
+                        actionBtn.className = 'btn btn-sm btn-secondary';
+                    } else {
+                        actionBtn.textContent = 'Add';
+                        actionBtn.onclick = () => {
+                            addSearchedContact(u.username, u.email);
+                        };
+                    }
+                    
+                    item.appendChild(info);
+                    item.appendChild(actionBtn);
+                    resultsBox.appendChild(item);
+                });
+            })
+            .catch(err => console.error('Error searching users:', err));
+        }
+        
+        function addSearchedContact(username, email) {
+            fetch('/api/contacts', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ name: username, username: username, email: email })
+            })
+            .then(res => {
+                if (!res.ok) throw new Error('Failed to add contact');
+                return res.json();
+            })
+            .then(contact => {
+                // Add to local data
+                contactsData.push(contact);
+                contactsData.sort((a, b) => a.name.localeCompare(b.name));
+                
+                // Re-render
+                renderContactsUI();
+                renderHomeContactsUI();
+                logActivity(`Added contact ${contact.name}`);
+                
+                // Close modal
+                closeAddContactModal();
+            })
+            .catch(err => {
+                console.error(err);
+                alert('Error adding contact.');
+            });
+        }
+
+        function deleteContact(contactId) {
+            if (!confirm('Are you sure you want to remove this contact?')) return;
+
+            fetch(`/api/contacts/${contactId}`, {
+                method: 'DELETE'
+            })
+            .then(res => {
+                if (!res.ok) throw new Error('Failed to delete contact');
+                return res.json();
+            })
+            .then(() => {
+                // Remove from local contacts data array
+                const index = contactsData.findIndex(c => c.id === contactId);
+                let deletedName = "Contact";
+                if (index !== -1) {
+                    deletedName = contactsData[index].name;
+                    contactsData.splice(index, 1);
+                }
+
+                // Re-render UIs
+                renderContactsUI();
+                renderHomeContactsUI();
+                logActivity(`Deleted contact ${deletedName}`);
+            })
+            .catch(err => {
+                console.error(err);
+                alert('Error deleting contact.');
+            });
+        }
+
+        function filterContacts() {
+            const query = document.getElementById('contacts-search-input').value.toLowerCase();
+            const cards = document.querySelectorAll('#contacts-grid-container .contact-card');
+            let hasVisible = false;
+
+            cards.forEach(card => {
+                const name = card.querySelector('.contact-card-name').textContent.toLowerCase();
+                const user = card.querySelector('.contact-card-username').textContent.toLowerCase();
+                if (name.includes(query) || user.includes(query)) {
+                    card.style.display = 'flex';
+                    hasVisible = true;
+                } else {
+                    card.style.display = 'none';
+                }
+            });
+
+            const emptyText = document.getElementById('contacts-empty-text');
+            if (emptyText) {
+                emptyText.style.display = hasVisible ? 'none' : 'block';
+            }
+        }
+
+        function renderContactsUI() {
+            const container = document.getElementById('contacts-grid-container');
+            if (!container) return;
+
+            if (contactsData.length === 0) {
+                container.innerHTML = `<div class="contacts-empty-state-full" id="contacts-empty-text">No contacts added yet.</div>`;
+                return;
+            }
+
+            let html = '';
+            contactsData.forEach(contact => {
+                html += `
+                    <div class="contact-card" id="contact-card-${contact.id}">
+                        <div class="contact-card-avatar-wrapper">
+                            <div class="contact-card-avatar">${contact.name[0].toUpperCase()}</div>
+                            <span class="contact-status-dot" data-username="${contact.name}"></span>
+                        </div>
+                        <div class="contact-card-info">
+                            <span class="contact-card-name">${contact.name}</span>
+                            <span class="contact-card-username">${contact.username || 'No email'}</span>
+                            <span class="contact-card-status" data-status-username="${contact.name}" style="font-size: 0.72rem; color: var(--primary-muted); margin-top: 0.15rem;">Offline</span>
+                        </div>
+                        <div class="contact-card-actions">
+                            <button class="btn btn-secondary btn-sm" onclick="startChatWithContact('${contact.name.replace(/'/g, "\\'")}')">Message</button>
+                            <button class="btn-text-danger btn-sm" onclick="deleteContact(${contact.id})">Delete</button>
+                        </div>
+                    </div>
+                `;
+            });
+            container.innerHTML = html;
+            if (typeof updateOnlineStatusUI === 'function') updateOnlineStatusUI();
+        }
+
+        function renderHomeContactsUI() {
+            const container = document.getElementById('home-contacts-list');
+            if (!container) return;
+
+            if (contactsData.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state-card">
+                        <div class="empty-state-illustration">
+                            <svg viewBox="0 0 24 24" width="44" height="44" stroke="currentColor" stroke-width="1.2" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                                <circle cx="9" cy="7" r="4"></circle>
+                                <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+                                <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+                            </svg>
+                        </div>
+                        <p class="empty-state-desc">No contacts added yet.</p>
+                        <button class="btn btn-sm btn-outline" onclick="openAddContactModal()">Add Contact</button>
+                    </div>
+                `;
+                return;
+            }
+
+            let html = '<div class="recent-contacts-grid">';
+            contactsData.slice(0, 3).forEach(contact => {
+                html += `
+                    <div class="recent-contact-item">
+                        <div class="contact-avatar-wrapper">
+                            <div class="contact-avatar">${contact.name[0].toUpperCase()}</div>
+                            <span class="contact-status-dot" data-username="${contact.name}"></span>
+                        </div>
+                        <div class="contact-details">
+                            <span class="contact-name">${contact.name}</span>
+                            <span class="contact-email" data-status-username="${contact.name}">Offline</span>
+                        </div>
+                        <button class="btn-text-action" onclick="startChatWithContact('${contact.name.replace(/'/g, "\\'")}')">Message</button>
+                    </div>
+                `;
+            });
+            html += '</div>';
+            container.innerHTML = html;
+            if (typeof updateOnlineStatusUI === 'function') updateOnlineStatusUI();
+        }
+
+        // --- CONVERSATIONS / CHATS LOGIC ---
+        function openStartChatModal() {
+            const modal = document.getElementById('start-chat-modal');
+            modal.classList.remove('hidden');
+            document.getElementById('new-chat-name').focus();
+
+            // Render suggestions
+            const container = document.getElementById('suggestions-list-container');
+            if (contactsData.length === 0) {
+                container.innerHTML = `<span style="font-size: 0.8rem; color: var(--primary-muted); padding: 0.5rem 0;">No contacts yet. Add a contact first or type a name.</span>`;
+            } else {
+                let html = '';
+                contactsData.forEach(c => {
+                    html += `
+                        <button class="suggestion-item" onclick="selectSuggestedContact('${c.name.replace(/'/g, "\\'")}')">
+                            <span class="suggest-avatar">${c.name[0].toUpperCase()}</span>
+                            <span class="suggest-name">${c.name}</span>
+                        </button>
+                    `;
+                });
+                container.innerHTML = html;
+            }
+        }
+
+        function closeStartChatModal() {
+            document.getElementById('start-chat-modal').classList.add('hidden');
+            document.getElementById('new-chat-name').value = '';
+        }
+
+        function selectSuggestedContact(name) {
+            document.getElementById('new-chat-name').value = name;
+            submitStartChat();
+        }
+
+        function startChatWithContact(name) {
+            // Check if conversation exists
+            const existing = conversationsData.find(c => c.name.toLowerCase() === name.toLowerCase());
+            if (existing) {
+                switchTab('chats');
+                openConversation(existing.id, existing.name);
+            } else {
+                // Create conversation
+                fetch('/api/conversations', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ name })
+                })
+                .then(res => res.json())
+                .then(conv => {
+                    if (!conversationsData.some(c => c.id === conv.id)) {
+                        conversationsData.unshift(conv);
+                    }
+                    renderConversationsListUI();
+                    renderHomeConversationsUI();
+                    switchTab('chats');
+                    openConversation(conv.id, conv.name);
+                    logActivity(`Started conversation with ${conv.name}`);
+                })
+                .catch(err => {
+                    console.error(err);
+                    alert('Error starting chat.');
+                });
+            }
+        }
+
+        function submitStartChat() {
+            const name = document.getElementById('new-chat-name').value.trim();
+            if (!name) {
+                alert('Please enter a name.');
+                return;
+            }
+            closeStartChatModal();
+            startChatWithContact(name);
+        }
+
+        function openConversation(convId, convName) {
+            // Leave previous room if any
+            if (activeConversationId && activeConversationId !== convId) {
+                socket.emit('leave_conversation', { conversation_id: activeConversationId });
+            }
+
+            activeConversationId = convId;
+
+            // Reset unread count locally when conversation is opened
+            const conv = conversationsData.find(c => c.id === convId);
+            if (conv) {
+                conv.unread_count = 0;
+            }
+            renderConversationsListUI();
+            updateTotalUnreadBadge();
+
+            // Join new room
+            socket.emit('join_conversation', { conversation_id: convId });
+            // Mark all messages as read on the backend
+            socket.emit('mark_read', { conversation_id: convId });
+
+            // Mark active item in list
+            document.querySelectorAll('.chat-list-item').forEach(item => {
+                item.classList.remove('active');
+            });
+            const activeItem = document.getElementById(`chat-item-${convId}`);
+            if (activeItem) {
+                activeItem.classList.add('active');
+            }
+
+            // Mobile view toggle classes
+            document.getElementById('chats-workspace-layout').classList.add('chat-open');
+
+            // Toggle active state viewport panels
+            document.getElementById('chat-empty-state').classList.add('hidden');
+            document.getElementById('chat-active-state').classList.remove('hidden');
+
+            // Set Header details
+            document.getElementById('active-chat-avatar').textContent = convName[0].toUpperCase();
+            document.getElementById('active-chat-name').textContent = convName;
+            
+            const activeDot = document.getElementById('active-chat-status-dot');
+            if (activeDot) {
+                activeDot.setAttribute('data-username', convName);
+            }
+
+            // Load shimmering skeleton first
+            const messagesBox = document.getElementById('chat-messages-box');
+            messagesBox.innerHTML = `
+                <div class="skeleton-loader">
+                    <div class="skeleton-line bubble contact"></div>
+                    <div class="skeleton-line bubble me"></div>
+                    <div class="skeleton-line bubble contact"></div>
+                </div>
+            `;
+
+            // Wait 350ms to simulate secure retrieval
+            setTimeout(() => {
+                fetch(`/api/conversations/${convId}/messages`)
+                .then(res => res.json())
+                .then(messages => {
+                    messagesBox.innerHTML = '';
+                    if (messages.length === 0) {
+                        messagesBox.innerHTML = `<div class="content-empty-state" style="text-align: center; padding: 2rem 0;">No messages yet. Send a secure message to start the conversation.</div>`;
+                    } else {
+                        messages.forEach(msg => {
+                            appendMessageBubble(msg.sender === 'me', msg.text, msg.is_read, msg.read_at, msg.is_delivered, msg.delivered_at);
+                        });
+                    }
+                    scrollToBottom('chat-messages-box');
+                    // Sync active status dot immediately
+                    if (typeof updateOnlineStatusUI === 'function') updateOnlineStatusUI();
+                })
+                .catch(err => {
+                    console.error(err);
+                    messagesBox.innerHTML = `<div class="form-error">Failed to load message history.</div>`;
+                });
+            }, 350);
+        }
+
+        function closeConversationView() {
+            // Mobile viewport return to sidebar
+            document.getElementById('chats-workspace-layout').classList.remove('chat-open');
+        }
+
+        function appendMessageBubble(isMe, text, isRead, readAt, isDelivered, deliveredAt) {
+            const box = document.getElementById('chat-messages-box');
+            
+            // Remove empty state message if exists
+            const emptyText = box.querySelector('.content-empty-state');
+            if (emptyText) emptyText.remove();
+
+            const bubble = document.createElement('div');
+            bubble.className = `message-bubble ${isMe ? 'me' : 'contact'}`;
+            
+            const content = document.createElement('span');
+            content.textContent = text;
+            bubble.appendChild(content);
+
+            if (isMe) {
+                const status = document.createElement('span');
+                status.className = 'message-status';
+                status.style.fontSize = '0.68rem';
+                status.style.marginLeft = '0.35rem';
+                status.style.opacity = '0.85';
+                
+                if (isRead) {
+                    status.innerHTML = ' &#10003;&#10003;'; // Double checkmark (Read)
+                    status.style.color = 'var(--cyan)';
+                } else if (isDelivered) {
+                    status.innerHTML = ' &#10003;&#10003;'; // Double checkmark (Delivered)
+                    status.style.color = 'var(--primary-muted)';
+                } else {
+                    status.innerHTML = ' &#10003;'; // Single checkmark (Sent)
+                    status.style.color = 'var(--primary-muted)';
+                }
+                bubble.appendChild(status);
+            }
+
+            box.appendChild(bubble);
+            scrollToBottom('chat-messages-box');
+        }
+
+        function handleChatInputKey(e) {
+            if (e.key === 'Enter') {
+                sendChatMessage();
+            }
+        }
+
+        function sendChatMessage() {
+            if (!activeConversationId) return;
+            const input = document.getElementById('chat-message-input');
+            const text = input.value.trim();
+            if (!text) return;
+
+            // Clear input and typing status
+            input.value = '';
+            if (isTypingCurrently) {
+                isTypingCurrently = false;
+                clearTimeout(typingTimeout);
+                socket.emit('typing', {
+                    conversation_id: activeConversationId,
+                    is_typing: false
+                });
+            }
+
+            // Emit via Socket.IO
+            socket.emit('send_message', { conversation_id: activeConversationId, text: text });
+        }
+
+        function showTypingIndicator(show, name) {
+            const box = document.getElementById('chat-messages-box');
+            const indicatorId = 'typing-indicator-bubble';
+            let indicator = document.getElementById(indicatorId);
+
+            if (show) {
+                if (!indicator) {
+                    indicator = document.createElement('div');
+                    indicator.id = indicatorId;
+                    indicator.className = 'message-bubble typing';
+                    indicator.textContent = `${name || 'Contact'} is typing...`;
+                    box.appendChild(indicator);
+                    scrollToBottom('chat-messages-box');
+                } else {
+                    indicator.textContent = `${name || 'Contact'} is typing...`;
+                }
+            } else {
+                if (indicator) {
+                    indicator.remove();
+                }
+            }
+        }
+
+        function filterConversations() {
+            const query = document.getElementById('chats-search-input').value.toLowerCase().trim();
+            const container = document.getElementById('chats-list-container');
+            if (!container) return;
+
+            if (query === '') {
+                renderConversationsListUI();
+                return;
+            }
+
+            const filteredConvs = conversationsData.filter(c => c.name.toLowerCase().includes(query));
+            const filteredContacts = contactsData.filter(c => c.name.toLowerCase().includes(query) && !conversationsData.some(cv => cv.name.toLowerCase() === c.name.toLowerCase()));
+
+            if (filteredConvs.length === 0 && filteredContacts.length === 0) {
+                container.innerHTML = `
+                    <div class="chats-empty-state" id="chats-empty-text" style="display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 3rem 1.5rem; text-align: center;">
+                        <div class="empty-state-icon-wrapper" style="width: 44px; height: 44px; margin-bottom: 1rem; border-color: rgba(255, 255, 255, 0.08); background: rgba(255,255,255,0.02); animation: none;">
+                            <svg viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                                <circle cx="11" cy="11" r="8"></circle>
+                                <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                            </svg>
+                        </div>
+                        <span style="font-size: 0.82rem; font-weight: 550; color: var(--primary);">No results found</span>
+                        <span style="font-size: 0.72rem; color: var(--primary-muted); margin-top: 0.25rem; max-width: 200px;">No chats or contacts match "${query}"</span>
+                    </div>
+                `;
+                return;
+            }
+
+            let html = '';
+            if (filteredConvs.length > 0) {
+                filteredConvs.forEach(conv => {
+                    const isActive = (conv.id === activeConversationId) ? 'active' : '';
+                    const badgeHtml = conv.unread_count > 0 ? `<span class="notification-badge-pink mini" style="margin-left: auto;">${conv.unread_count}</span>` : '';
+                    html += `
+                        <div class="chat-list-item ${isActive}" id="chat-item-${conv.id}" onclick="openConversation(${conv.id}, '${conv.name.replace(/'/g, "\\'")}')">
+                            <div class="chat-avatar-wrapper">
+                                <div class="chat-avatar">${conv.name[0].toUpperCase()}</div>
+                                <span class="chat-status-dot" data-username="${conv.name}"></span>
+                            </div>
+                            <div class="chat-item-info" style="width: 100%;">
+                                <div class="chat-item-header" style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
+                                    <span class="chat-item-name">${conv.name}</span>
+                                    ${badgeHtml}
+                                </div>
+                                <span class="chat-item-preview">Open secure chat</span>
+                            </div>
+                        </div>
+                    `;
+                });
+            }
+
+            if (filteredContacts.length > 0) {
+                html += `<div class="palette-group-title" style="margin-top: 0.5rem; padding: 0.4rem 0.75rem; font-size: 0.65rem; text-transform: uppercase; color: var(--primary-muted);">Contacts (New Chat)</div>`;
+                filteredContacts.forEach(contact => {
+                    html += `
+                        <div class="chat-list-item" onclick="startChatWithContact('${contact.name.replace(/'/g, "\\'")}')">
+                            <div class="chat-avatar-wrapper">
+                                <div class="chat-avatar">${contact.name[0].toUpperCase()}</div>
+                                <span class="chat-status-dot" data-username="${contact.name}"></span>
+                            </div>
+                            <div class="chat-item-info">
+                                <div class="chat-item-header">
+                                    <span class="chat-item-name">${contact.name}</span>
+                                </div>
+                                <span class="chat-item-preview">Click to start conversation</span>
+                            </div>
+                        </div>
+                    `;
+                });
+            }
+
+            container.innerHTML = html;
+            updateOnlineStatusUI();
+        }
+
+        function renderConversationsListUI() {
+            const container = document.getElementById('chats-list-container');
+            if (!container) return;
+
+            if (conversationsData.length === 0) {
+                container.innerHTML = `<div class="chats-empty-state" id="chats-empty-text">No conversations yet.</div>`;
+                return;
+            }
+
+            let html = '';
+            conversationsData.forEach(conv => {
+                const isActive = (conv.id === activeConversationId) ? 'active' : '';
+                const badgeHtml = conv.unread_count > 0 ? `<span class="notification-badge-pink mini" style="margin-left: auto;">${conv.unread_count}</span>` : '';
+                html += `
+                    <div class="chat-list-item ${isActive}" id="chat-item-${conv.id}" onclick="openConversation(${conv.id}, '${conv.name.replace(/'/g, "\\'")}')">
+                        <div class="chat-avatar-wrapper">
+                            <div class="chat-avatar">${conv.name[0].toUpperCase()}</div>
+                            <span class="chat-status-dot" data-username="${conv.name}"></span>
+                        </div>
+                        <div class="chat-item-info" style="width: 100%;">
+                            <div class="chat-item-header" style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
+                                <span class="chat-item-name">${conv.name}</span>
+                                ${badgeHtml}
+                            </div>
+                            <span class="chat-item-preview">Open secure chat</span>
+                        </div>
+                    </div>
+                `;
+            });
+            container.innerHTML = html;
+            if (typeof updateOnlineStatusUI === 'function') updateOnlineStatusUI();
+        }
+
+        function renderHomeConversationsUI() {
+            const container = document.getElementById('home-recent-conversations');
+            if (!container) return;
+
+            if (conversationsData.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state-card">
+                        <div class="empty-state-illustration">
+                            <svg viewBox="0 0 24 24" width="44" height="44" stroke="currentColor" stroke-width="1.2" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+                            </svg>
+                        </div>
+                        <p class="empty-state-desc">No conversations yet.<br>Start your first secure conversation.</p>
+                        <button class="btn btn-sm btn-outline" onclick="openStartChatModal()">Start Conversation</button>
+                    </div>
+                `;
+                return;
+            }
+
+            let html = '<div class="recent-conversations-grid">';
+            conversationsData.slice(0, 3).forEach(conv => {
+                html += `
+                    <div class="recent-conv-item" onclick="openConversation(${conv.id}, '${conv.name.replace(/'/g, "\\'")}')">
+                        <div class="chat-avatar-wrapper">
+                            <div class="conv-avatar">${conv.name[0].toUpperCase()}</div>
+                            <span class="chat-status-dot" data-username="${conv.name}"></span>
+                        </div>
+                        <div class="conv-details">
+                            <span class="conv-name">${conv.name}</span>
+                            <span class="conv-meta">Open conversation</span>
+                        </div>
+                    </div>
+                `;
+            });
+            html += '</div>';
+            container.innerHTML = html;
+            if (typeof updateOnlineStatusUI === 'function') updateOnlineStatusUI();
+        }
+
+        // --- ACTIVITY LOGIC ---
+        function logActivity(text) {
+            const time = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+            activities.unshift(`[${time}] ${text}`);
+            if (activities.length > 5) activities.pop();
+            updateRecentActivityUI();
+        }
+
+        function updateRecentActivityUI() {
+            const container = document.getElementById('home-recent-activity');
+            if (!container) return;
+
+            if (activities.length === 0) {
+                container.innerHTML = 'No activity yet.';
+                return;
+            }
+
+            let html = '<ul style="list-style: none; display: flex; flex-direction: column; gap: 0.4rem; padding-left: 0.25rem;">';
+            activities.forEach(act => {
+                html += `<li style="font-size: 0.82rem; color: var(--primary-muted);">${act}</li>`;
+            });
+            html += '</ul>';
+            container.innerHTML = html;
+        }
+
+        // --- COMMAND PALETTE LOGIC (Ctrl+K) ---
+        const palette = document.getElementById('command-palette');
+        const paletteSearch = document.getElementById('palette-search');
+        const paletteResults = document.getElementById('palette-results-box');
+
+        function openPalette() {
+            palette.classList.remove('hidden');
+            paletteSearch.value = '';
+            paletteSearch.focus();
+            handlePaletteSearch(); // Render default list
+        }
+
+        function closePalette() {
+            palette.classList.add('hidden');
+            paletteSearch.value = '';
+        }
+
+        // Search through actual contacts and conversations
+        function handlePaletteSearch() {
+            const query = paletteSearch.value.trim().toLowerCase();
+            
+            // Filter conversations & contacts
+            const filteredConvs = conversationsData.filter(c => c.name.toLowerCase().includes(query));
+            const filteredContacts = contactsData.filter(c => c.name.toLowerCase().includes(query));
+
+            if (query === '') {
+                // Show default options
+                let html = '';
+                
+                // Show chats
+                if (conversationsData.length > 0) {
+                    html += `<div class="palette-group">
+                        <div class="palette-group-title">Recent Conversations</div>`;
+                    conversationsData.slice(0, 3).forEach((c, idx) => {
+                        const activeClass = (idx === 0) ? 'active' : '';
+                        html += `<button class="palette-item ${activeClass}" onclick="triggerPaletteConv(${c.id}, '${c.name.replace(/'/g, "\\'")}')">
+                            💬 Chat: ${c.name}
+                        </button>`;
+                    });
+                    html += `</div>`;
+                }
+
+                // Show contacts
+                if (contactsData.length > 0) {
+                    html += `<div class="palette-group" style="margin-top: 0.75rem;">
+                        <div class="palette-group-title">Contacts</div>`;
+                    contactsData.slice(0, 3).forEach(c => {
+                        html += `<button class="palette-item" onclick="triggerPaletteContact('${c.name.replace(/'/g, "\\'")}')">
+                            👥 Contact: ${c.name}
+                        </button>`;
+                    });
+                    html += `</div>`;
+                }
+
+                // If nothing, show basic actions
+                if (conversationsData.length === 0 && contactsData.length === 0) {
+                    html += `<div class="palette-group">
+                        <div class="palette-group-title">Workspace Actions</div>
+                        <button class="palette-item active" onclick="closePalette(); openAddContactModal();">👥 Add New Contact</button>
+                        <button class="palette-item" onclick="closePalette(); openStartChatModal();">💬 Start New Chat</button>
+                    </div>`;
+                }
+
+                paletteResults.innerHTML = html;
+                return;
+            }
+
+            // Show filtered results
+            let html = '';
+            let hasResults = false;
+
+            if (filteredConvs.length > 0) {
+                hasResults = true;
+                html += `<div class="palette-group">
+                    <div class="palette-group-title">Matching Conversations</div>`;
+                filteredConvs.forEach((c, idx) => {
+                    const activeClass = (idx === 0) ? 'active' : '';
+                    html += `<button class="palette-item ${activeClass}" onclick="triggerPaletteConv(${c.id}, '${c.name.replace(/'/g, "\\'")}')">
+                        💬 Open chat with ${c.name}
+                    </button>`;
+                });
+                html += `</div>`;
+            }
+
+            if (filteredContacts.length > 0) {
+                hasResults = true;
+                html += `<div class="palette-group" style="margin-top: 0.75rem;">
+                    <div class="palette-group-title">Matching Contacts</div>`;
+                filteredContacts.forEach((c, idx) => {
+                    const activeClass = (!hasResults && idx === 0) ? 'active' : '';
+                    html += `<button class="palette-item ${activeClass}" onclick="triggerPaletteContact('${c.name.replace(/'/g, "\\'")}')">
+                        👥 Chat with ${c.name}
+                    </button>`;
+                });
+                html += `</div>`;
+            }
+
+            if (!hasResults) {
+                html = `
+                    <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 2.5rem 1.5rem; text-align: center;">
+                        <div class="empty-state-icon-wrapper" style="width: 44px; height: 44px; margin-bottom: 1rem; border-color: rgba(255, 255, 255, 0.08); background: rgba(255,255,255,0.02); animation: none; color: var(--primary-muted);">
+                            <svg viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                                <circle cx="11" cy="11" r="8"></circle>
+                                <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                            </svg>
+                        </div>
+                        <span style="font-size: 0.82rem; font-weight: 550; color: var(--primary);">No results found</span>
+                        <span style="font-size: 0.72rem; color: var(--primary-muted); margin-top: 0.25rem;">No chats or contacts match "${query}"</span>
+                    </div>
+                `;
+            }
+
+            paletteResults.innerHTML = html;
+        }
+
+        function triggerPaletteConv(id, name) {
+            closePalette();
+            switchTab('chats');
+            openConversation(id, name);
+        }
+
+        // Start chat or open conversation
+        function triggerPaletteContact(name) {
+            closePalette();
+            startChatWithContact(name);
+        }
+
+        // Keyboard navigation inside Palette results
+        paletteSearch.addEventListener('keydown', (e) => {
+            const items = Array.from(paletteResults.querySelectorAll('.palette-item'));
+            const activeItem = paletteResults.querySelector('.palette-item.active');
+            let activeIndex = items.indexOf(activeItem);
+
+            if (e.key === 'ArrowDown') {
+                e.preventDefault();
+                if (activeIndex < items.length - 1) {
+                    if (activeItem) activeItem.classList.remove('active');
+                    items[activeIndex + 1].classList.add('active');
+                    items[activeIndex + 1].scrollIntoView({ block: 'nearest' });
+                }
+            } else if (e.key === 'ArrowUp') {
+                e.preventDefault();
+                if (activeIndex > 0) {
+                    if (activeItem) activeItem.classList.remove('active');
+                    items[activeIndex - 1].classList.add('active');
+                    items[activeIndex - 1].scrollIntoView({ block: 'nearest' });
+                }
+            } else if (e.key === 'Enter') {
+                e.preventDefault();
+                if (activeItem) {
+                    activeItem.click();
+                }
+            }
+        });
+
+        // --- UTILS ---
+        function scrollToBottom(elementId) {
+            const el = document.getElementById(elementId);
+            if (el) {
+                el.scrollTop = el.scrollHeight;
+            }
+        }
+
+        // Global key bindings (Ctrl+K and ESC)
+        document.addEventListener('keydown', (e) => {
+            if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'k') {
+                e.preventDefault();
+                openPalette();
+            }
+            if (e.key === 'Escape') {
+                closePalette();
+                closeProfileDrawer();
+                closeStartChatModal();
+                closeAddContactModal();
+            }
+        });
+        
+        // Close modals on overlay clicks
+        palette.addEventListener('click', (e) => {
+            if (e.target === palette) closePalette();
+        });
+        document.getElementById('start-chat-modal').addEventListener('click', (e) => {
+            if (e.target === document.getElementById('start-chat-modal')) closeStartChatModal();
+        });
+        document.getElementById('add-contact-modal').addEventListener('click', (e) => {
+            if (e.target === document.getElementById('add-contact-modal')) closeAddContactModal();
+        });
+
+        // Close settings drawer on clicking main content or bottom nav
+        document.querySelector('.main-content').addEventListener('click', () => {
+            closeProfileDrawer();
+        });
+        document.querySelector('.mobile-bottom-nav').addEventListener('click', (e) => {
+            if (!e.target.closest('#mobile-menu-settings')) {
+                closeProfileDrawer();
+            }
+        });
+
+        // Periodically refresh human-readable last seen timers
+        setInterval(updateOnlineStatusUI, 30000);
+    </script>
+</body>
+</html>
